@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dl4g"
+version = "0.1.0"
+description = "A description of your project"
+authors = [
+    { name = "Nicola Hermann", email = "nicola.hermann@stud.hslu.ch.ch" }
+]
+license = { text = "Apache 2.0" }
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.2",
+    # Add other development dependencies here
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests"
+]
