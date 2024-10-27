@@ -1,10 +1,17 @@
 from jass.arena.arena import Arena
 from jass.agents.agent_random_schieber import AgentRandomSchieber
 
-from dl4g.agent import MyAgent
+from dl4g.agents.baseline_agent import BaselineAgent, TrumpSelectionAgent
 
-arena = Arena(nr_games_to_play=100)
-arena.set_players(MyAgent(), AgentRandomSchieber(), MyAgent(), AgentRandomSchieber())
+arena = Arena(nr_games_to_play=1000)
+# Create a txt file for logs
+with open("log.txt", "w") as f:
+    f.write("Log file for the arena\n")
+
+
+arena.set_players(
+    BaselineAgent(), TrumpSelectionAgent(), TrumpSelectionAgent(), TrumpSelectionAgent()
+)
 
 arena.play_all_games()
 
