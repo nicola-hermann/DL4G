@@ -1,6 +1,4 @@
-from jass.arena.arena import Arena
-
-from dl4g.agents.baseline_agent import BaselineAgent
+from jass.agents.agent_by_network import AgentByNetwork
 from jass.game.rule_schieber import RuleSchieber
 from jass.game.game_sim import GameSim
 from jass.game.const import NORTH
@@ -9,7 +7,9 @@ from jass.game.game_util import deal_random_hand
 
 rule = RuleSchieber()
 game = GameSim(rule=rule)
-agent = BaselineAgent()
+agent = AgentByNetwork(
+    "https://dl4g-64472410636.europe-west3.run.app/differenzler", timeout=10
+)
 game.init_from_cards(hands=deal_random_hand(), dealer=NORTH)
 
 obs = game.get_observation()

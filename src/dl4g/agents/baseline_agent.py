@@ -23,12 +23,12 @@ class BaselineAgent(BaseAgent):
         cards = convert_one_hot_encoded_cards_to_int_encoded_list(obs.hand)
         scores = [calculate_trump_selection_score(cards, color) for color in range(4)]
         if obs.forehand == 0:
-            return np.argmax(scores)
+            return int(np.argmax(scores))
         else:
             if max(scores) > 68:
-                return np.argmax(scores)
+                return int(np.argmax(scores))
             else:
-                return PUSH
+                return int(PUSH)
 
     def action_play_card(self, obs: GameObservation) -> int:
         """
