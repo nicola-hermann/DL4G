@@ -1,7 +1,7 @@
 import logging
 
 from jass.service.player_service_app import PlayerServiceApp
-from dl4g.agents.baseline_agent import BaselineAgent
+from dl4g.agents.ismcts_agent import ISMCTSAgent
 
 
 def create_app():
@@ -18,7 +18,7 @@ def create_app():
     # app.config.from_pyfile('my_player_service.cfg', silent=False)
 
     # add some players
-    app.add_player("differenzler", BaselineAgent())
+    app.add_player("differenzler", ISMCTSAgent())
 
     return app
 

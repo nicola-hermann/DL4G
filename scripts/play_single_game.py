@@ -11,7 +11,7 @@ game = GameSim(rule=rule)
 # agent = AgentByNetwork(
 #     "https://dl4g-64472410636.europe-west3.run.app/differenzler", timeout=10
 # )
-agent = ISMCTSAgent()
+agent = ISMCTSAgent(0.7, 2)
 # agent = BaselineAgent()
 game.init_from_cards(hands=deal_random_hand(), dealer=NORTH)
 

@@ -10,12 +10,12 @@ with open("log.txt", "w") as f:
     f.write("Log file for the arena\n")
 
 
-arena = Arena(nr_games_to_play=20)
+arena = Arena(nr_games_to_play=10)
 arena.set_players(
-    ISMCTSAgent(0.7, 9),
-    ISMCTSAgent(0.3, 9),
-    ISMCTSAgent(0.7, 9),
-    ISMCTSAgent(0.3, 9),
+    ISMCTSAgent(0.3, 2),
+    AgentRandomSchieber(),
+    ISMCTSAgent(0.3, 2),
+    AgentRandomSchieber(),
 )
 
 arena.play_all_games()

@@ -39,4 +39,5 @@ traitlets==5.14.3
 typing_extensions==4.12.2
 wcwidth==0.2.13
 Werkzeug==3.1.3
-git+https://github.com/thomas-koller/jass-kit-py.git
+# Forked jass-kit to get rid of unwanted behavior
+git+https://github.com/nicola-hermann/jass-kit-py.git

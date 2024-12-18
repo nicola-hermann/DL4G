@@ -53,5 +53,5 @@ class ISMCTSAgent(BaseAgent):
 
         state = state_from_observation(obs, hands)
         best_action, iterations = ismcts(state, self._rule, self.time_limit, self.c)
-        # print(f"ISMCTS iterations: {iterations}")
+        print(f"ISMCTS iterations: {iterations}")
         return int(best_action)
