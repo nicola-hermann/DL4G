@@ -9,8 +9,10 @@ from dl4g.ismcts import ismcts
 
 
 class ISMCTSAgent(BaseAgent):
-    def __init__(self):
+    def __init__(self, c=0.1, time_limit=2):
         super().__init__()
+        self.c = c
+        self.time_limit = time_limit
 
     def action_trump(self, obs: GameObservation) -> int:
         """
@@ -50,5 +52,6 @@ class ISMCTSAgent(BaseAgent):
         hands[player] = hand
 
         state = state_from_observation(obs, hands)
-        best_action = ismcts(state, self._rule, 1000, 1.0)
-        breakpoint()
+        best_action, iterations = ismcts(state, self._rule, self.time_limit, self.c)
+        # print(f"ISMCTS iterations: {iterations}")
+        return int(best_action)
