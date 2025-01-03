@@ -86,8 +86,4 @@ class HeuristicAgent(BaseAgent):
                 else:
                     played_card = winning_cards[0]
 
-        # Append log file with infos
-        log_to_file(
-            obs, played_card, all_cards, valid_cards, losing_cards, winning_cards
-        )
         return played_card
