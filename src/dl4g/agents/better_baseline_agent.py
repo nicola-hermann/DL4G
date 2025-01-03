@@ -6,19 +6,12 @@ from dl4g.utils import calculate_trump_selection_score, log_to_file, calc_curren
 import numpy as np
 
 
-class BetterBaselineAgent(BaseAgent):
+class HeuristicAgent(BaseAgent):
     def __init__(self):
         super().__init__()
 
     def action_trump(self, obs: GameObservation) -> int:
-        """
-        Determine trump action for the given observation
-        Args:
-            obs: the game observation, it must be in a state for trump selection
 
-        Returns:
-            selected trump as encoded in jass.game.const or jass.game.const.PUSH
-        """
         scores = np.zeros(4)
         cards = convert_one_hot_encoded_cards_to_int_encoded_list(obs.hand)
         scores = [calculate_trump_selection_score(cards, color) for color in range(4)]
@@ -31,15 +24,7 @@ class BetterBaselineAgent(BaseAgent):
                 return int(PUSH)
 
     def action_play_card(self, obs: GameObservation) -> int:
-        """
-        Determine the card to play.
 
-        Args:
-            obs: the game observation
-
-        Returns:
-            the card to play, int encoded as defined in jass.game.const
-        """
         all_cards = convert_one_hot_encoded_cards_to_int_encoded_list(obs.hand)
         valid_cards = np.flatnonzero(self._rule.get_valid_cards_from_obs(obs))
         trump = obs.trump

@@ -8,10 +8,11 @@ from dl4g.agents.baseline_agent import BaselineAgent
 
 rule = RuleSchieber()
 game = GameSim(rule=rule)
-# agent = AgentByNetwork(
-#     "https://dl4g-64472410636.europe-west3.run.app/differenzler", timeout=10
-# )
-agent = ISMCTSAgent(0.7, 2)
+agent = AgentByNetwork(
+    "https://dl4g-nicola-hermann-64472410636.europe-west12.run.app/differenzler",
+    timeout=10,
+)
+# agent = ISMCTSAgent(0.7, 2)
 # agent = BaselineAgent()
 game.init_from_cards(hands=deal_random_hand(), dealer=NORTH)
 
@@ -25,3 +26,8 @@ while not game.is_done():
     action = agent.action_play_card(obs)
     game.action_play_card(action)
 print(game.state)
+
+# agent = AgentByNetwork(
+#     "https://dl4g-64472410636.europe-west3.run.app/differenzler", timeout=10
+# )
+agent = ISMCTSAgent(0.7, 2)

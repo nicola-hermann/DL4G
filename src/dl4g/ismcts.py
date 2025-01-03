@@ -28,15 +28,25 @@ class Node:
         self.simulation_results = []
 
     def get_legal_actions(self, state: GameState):
-        if state.player == -1:
-            return []
-        valid_cards = np.flatnonzero(self.rule.get_valid_cards_from_state(state))
-        return valid_cards
+        """
+        Get all legal actions for the current player.
+        """
+        return (
+            list(np.flatnonzero(self.rule.get_valid_cards_from_state(state)))
+            if state.player != -1
+            else []
+        )
 
     def is_fully_expanded(self):
-        return len(self.unexplored_actions) == 0
+        """
+        Check if all actions have been expanded.
+        """
+        return not self.unexplored_actions
 
     def best_child(self, exploration_constant=1.0, alpha=1.0):
+        """
+        Select the best child according to the UCB formula.
+        """
         best_value = -float("inf")
         best_child = None
         for child in self.children:
@@ -48,7 +58,7 @@ class Node:
                 np.log(self.visits + 1) / (child.visits + 1e-6)
             )
 
-            # Bonus term (uncertainty penalty)
+            # Bonus term (uncertainty penalty, stabalizes exploration)
             bonus_term = (
                 alpha * np.std(child.simulation_results) / np.sqrt(child.visits + 1e-6)
             )
@@ -68,24 +78,20 @@ def sample_information_set(state: GameState):
     Replace -1 or masked information with plausible values.
     """
     # Example: fill unknown cards with random ones
-    sampled_state = deepcopy(state)
+    sampled_state = GameState()
+    sampled_state.__dict__.update(state.__dict__)
 
     # Cards that have been played are known and should not be included in hands
-    played_cards = set(sampled_state.tricks.flatten())
-    played_cards.union(sampled_state.current_trick)
-    hand = set(np.flatnonzero(sampled_state.hands[state.player]))
-
-    # remove the -1
+    played_cards = set(sampled_state.tricks.flatten()) | set(
+        sampled_state.current_trick
+    )
     played_cards.discard(-1)
 
-    all_cards = set(range(36))
-    unseen_cards = all_cards - played_cards - hand
-    unseen_cards.discard(-1)
-    if len(played_cards | hand | unseen_cards) != 36:
-        breakpoint()
+    hand = set(np.flatnonzero(sampled_state.hands[state.player]))
 
-    # Randomly distribute unseen cards among other players
-    unseen_cards = list(unseen_cards)
+    all_cards = set(range(36))
+    unseen_cards = list(all_cards - played_cards - hand)
+
     np.random.shuffle(unseen_cards)
     starting_player = sampled_state.trick_first_player[sampled_state.nr_tricks]
 
@@ -94,7 +100,8 @@ def sample_information_set(state: GameState):
 
     already_played = np.zeros(4, dtype=int)
     curr_player = starting_player
-    for i in range(state.nr_cards_in_trick):
+
+    for _ in range(state.nr_cards_in_trick):
         already_played[curr_player] = 1
         curr_player = next_player[curr_player]
 
@@ -109,32 +116,27 @@ def sample_information_set(state: GameState):
     for i in range(4):
         all_cards_end.update(np.flatnonzero(sampled_state.hands[i]))
 
-    assert len(all_cards_end) == 36
-    assert len(unseen_cards) == 0
-
     return sampled_state
 
 
 def simulate_game(state: GameState, rule: GameRule):
     """
     Play out a random simulation to a terminal state.
-    Return the result of the simulation (e.g., points or win/loss).
     """
     if state.player != -1:
         game_sim = GameSim(rule=rule)
         game_sim.init_from_state(state)
         while not game_sim.is_done():
             obs = game_sim.get_observation()
-            action = random.choice(
-                np.flatnonzero(game_sim.rule.get_valid_cards_from_obs(obs))
-            )
+            valid_actions = np.flatnonzero(game_sim.rule.get_valid_cards_from_obs(obs))
+            action = valid_actions[random.randint(0, len(valid_actions) - 1)]
             game_sim.action_play_card(action)
         points_diff = game_sim.state.points[0] - game_sim.state.points[1]
     else:
         points_diff = state.points[0] - state.points[1]
     if state.player_view % 2 == 1:
         points_diff = -points_diff
-    # Return normalized points
+
     return points_diff / 157
 
 
@@ -153,9 +155,8 @@ def play_action(state: GameState, rule: GameRule, action: int):
     # play random cards for the other players until its the current player's turn
     while game_sim.state.player != state.player and not game_sim.is_done():
         obs = game_sim.get_observation()
-        action = random.choice(
-            np.flatnonzero(game_sim.rule.get_valid_cards_from_obs(obs))
-        )
+        valid_actions = np.flatnonzero(game_sim.rule.get_valid_cards_from_obs(obs))
+        action = valid_actions[random.randint(0, len(valid_actions) - 1)]
         game_sim.action_play_card(action)
 
     return game_sim.state
@@ -163,17 +164,17 @@ def play_action(state: GameState, rule: GameRule, action: int):
 
 def ismcts(root_state, rule, time_window=9, c=1.0):
     root_node = Node(root_state, rule=rule)
+
     # if root node only has one action, return it
     if len(root_node.unexplored_actions) == 1:
         return root_node.unexplored_actions[0], 0
 
     t1 = time.time()
     iterations = 0
-    # while iterations < 1000:
+
     while time.time() - t1 < time_window:
         # Step 1: Selection
         current_node = root_node
-        # Deteminize the state
         sampled_state = sample_information_set(current_node.state)
 
         while current_node.is_fully_expanded() and current_node.children:
@@ -191,8 +192,6 @@ def ismcts(root_state, rule, time_window=9, c=1.0):
         # Step 3: Simulation
         resampled_state = sample_information_set(current_node.state)
         result = simulate_game(resampled_state, rule)
-        if result > 1 or result < -1:
-            breakpoint()
 
         # Step 4: Backpropagation
         backpropagate(current_node, result)
